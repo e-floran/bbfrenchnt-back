@@ -24,6 +24,28 @@ router.get('/', (req, res) => {
     }
   })
 })
+
+//GET player by id
+router.get('/:id', (req, res) => {
+  const playerId = req.params.id
+  const sql = 'SELECT * FROM player WHERE player.player_id=?'
+  mysql.query(sql, playerId, (err, result) => {
+    if (err) {
+      res.status(500).send('1st Error')
+    } else {
+      const sql2 =
+        'SELECT player_has_user.user_user_id,user.* FROM  player_has_user LEFT JOIN user ON player_has_user.user_user_id'
+      mysql.query(sql2, playerId, (err, result2) => {
+        if (err) {
+          res.status(500).send('2nd error')
+        } else {
+          res.status(200).json({ result, result2 })
+        }
+      })
+    }
+  })
+})
+
 //Post into player
 router.post('/', (req, res) => {
   const bodyData = [
