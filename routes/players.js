@@ -3,14 +3,15 @@ const mysql = require('../db-config')
 
 const router = express.Router()
 
+//Get all players
 router.get('/', (req, res) => {
-  //Get all players
   const sql = 'SELECT * FROM player'
   mysql.query(sql, (err, result) => {
     console.log(result)
     if (err) {
       res.status(500).send('1st Error')
     } else {
+      //SELECT player_has_user
       const sql2 =
         'SELECT player_has_user.user_user_id,user.* FROM  player_has_user LEFT JOIN user ON player_has_user.user_user_id'
       mysql.query(sql2, (err, result2) => {
@@ -28,11 +29,13 @@ router.get('/', (req, res) => {
 //GET player by id
 router.get('/:id', (req, res) => {
   const playerId = req.params.id
+  //SELECT on player with id
   const sql = 'SELECT * FROM player WHERE player.player_id=?'
   mysql.query(sql, playerId, (err, result) => {
     if (err) {
       res.status(500).send('1st Error')
     } else {
+      //SELECT on player_has_user
       const sql2 =
         'SELECT player_has_user.user_user_id,user.* FROM  player_has_user LEFT JOIN user ON player_has_user.user_user_id'
       mysql.query(sql2, playerId, (err, result2) => {
@@ -79,6 +82,7 @@ router.post('/', (req, res) => {
     req.body.player_com,
     req.body.player_link
   ]
+  //Insert into player
   const sql = `INSERT INTO player
   (player_name, player_bbid, player_pos, player_salary, player_dmi, player_age, player_size, player_pot, player_weekf, player_js, player_port, player_exdef, player_agi, player_dri, player_pas, player_ishoot, player_idef, player_reb, player_blk, player_stam, player_ft, player_ex, player_tc_ex, player_tc_int, player_tc, player_ppot, player_selec, player_com, player_link) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`
 
@@ -86,7 +90,7 @@ router.post('/', (req, res) => {
     if (err) {
       res.status(500).send('1st error')
     } else {
-      //Post into player_has_user
+      //Insert into player_has_user
       const sql2 = `INSERT INTO player_has_user
     (player_player_id, user_user_id)
     VALUES (?, ?)`
@@ -96,6 +100,28 @@ router.post('/', (req, res) => {
       mysql.query(sql2, userData, (err, result2) => {
         if (err) {
           res.status(500).send('2nd error')
+        } else {
+          res.status(200).json({ result, result2 })
+        }
+      })
+    }
+  })
+})
+
+//DELETE player by id
+router.delete('/:id', (req, res) => {
+  const playerId = req.params.id
+  //DELETE into player_has_user
+  const sql = 'DELETE FROM player_has_user WHERE player_player_id=?'
+  mysql.query(sql, playerId, (err, result) => {
+    if (err) {
+      res.status(500).send('1st Err')
+    } else {
+      //DELETE player by id
+      const sql2 = 'DELETE  FROM player WHERE player.player_id=?'
+      mysql.query(sql2, playerId, (err, result2) => {
+        if (err) {
+          res.status(500).send('2nd Err')
         } else {
           res.status(200).json({ result, result2 })
         }
