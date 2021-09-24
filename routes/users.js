@@ -71,4 +71,17 @@ router.post('/', (req, res) => {
   })
 })
 
+//Delete a User by Id
+router.delete('/:id', (req, res) => {
+  const userId = req.params.id
+  const sql = 'DELETE FROM user WHERE user.user_id=?'
+  mysql.query(sql, userId, (err, result) => {
+    if (err) {
+      res.status(500).send('Error deleting user')
+    } else {
+      res.status(200).send('User Deleted')
+    }
+  })
+})
+
 module.exports = router
