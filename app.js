@@ -23,6 +23,7 @@ app.use(express.json())
 app.use(express.urlencoded({ extended: true }))
 
 app.use('/players', routes.players)
+app.use('/users', routes.users)
 
 app.listen(port, () => {
   console.log(`Server listening on port ${port}`)
