@@ -108,6 +108,40 @@ router.post('/', (req, res) => {
   })
 })
 
+//PUT player by id
+router.put('/:id', (req, res) => {
+  const playerId = req.params.id
+  mysql.query(
+    'SELECT * FROM player WHERE player.player_id = ?',
+    [playerId],
+    (err, result) => {
+      if (err) {
+        console.log(err)
+        res.status(500).send('Error updating')
+      } else {
+        const playerFromDb = result[0]
+        if (playerFromDb) {
+          const playerPropsToUpdate = req.body
+          mysql.query(
+            'UPDATE player SET ? WHERE player.player_id = ?',
+            [playerPropsToUpdate, playerId],
+            err => {
+              if (err) {
+                console.log(err)
+                res.status(500).send('Error updating')
+              } else {
+                res.status(200).json(playerPropsToUpdate)
+              }
+            }
+          )
+        } else {
+          res.status(404).send(`not found`)
+        }
+      }
+    }
+  )
+})
+
 //DELETE player by id
 router.delete('/:id', (req, res) => {
   const playerId = req.params.id
