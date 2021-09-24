@@ -46,4 +46,29 @@ router.get('/:id', (req, res) => {
     }
   })
 })
+
+//Post into user
+router.post('/', (req, res) => {
+  const bodyData = [req.body.user_log, req.body.user_passw, req.body.user_role]
+  //Insert into user
+  const sql =
+    'INSERT INTO user (user_log, user_passw, user_role) VALUES (?, ?, ?)'
+  mysql.query(sql, bodyData, (err, result) => {
+    if (err) {
+      res.status(500).send('Error 1')
+    } else {
+      // //Insert into player_has_user
+      // const sql2 =
+      //   'INSERT INTO player_has_user (user_user_id, player_player_id) VALUES (?, ?)'
+      // const idUser = result.insertId
+      // const userData = [idUser, req.body.player_player_id]
+      // mysql.query(sql2, userData, (err, result2) => {
+      //   if (err) {
+      //     res.status(500).send('Error 2')
+      //   } else {
+      res.status(200).json({ result })
+    }
+  })
+})
+
 module.exports = router

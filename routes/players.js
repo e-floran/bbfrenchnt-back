@@ -37,7 +37,7 @@ router.get('/:id', (req, res) => {
     } else {
       //SELECT on player_has_user
       const sql2 =
-        'SELECT player_has_user.user_user_id,user.* FROM  player_has_user LEFT JOIN user ON player_has_user.user_user_id'
+        'SELECT phu.player_player_id,user.* FROM player_has_user as phu LEFT JOIN user ON phu.user_user_id=user.user_id WHERE phu.player_player_id=?'
       mysql.query(sql2, playerId, (err, result2) => {
         if (err) {
           res.status(500).send('2nd error')
@@ -85,9 +85,10 @@ router.post('/', (req, res) => {
   //Insert into player
   const sql = `INSERT INTO player
   (player_name, player_bbid, player_pos, player_salary, player_dmi, player_age, player_size, player_pot, player_weekf, player_js, player_port, player_exdef, player_agi, player_dri, player_pas, player_ishoot, player_idef, player_reb, player_blk, player_stam, player_ft, player_ex, player_tc_ex, player_tc_int, player_tc, player_ppot, player_selec, player_com, player_link) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`
-
   mysql.query(sql, bodyData, (err, result) => {
     if (err) {
+      console.log(sql)
+      console.log(bodyData)
       res.status(500).send('1st error')
     } else {
       //Insert into player_has_user
@@ -96,8 +97,8 @@ router.post('/', (req, res) => {
     VALUES (?, ?)`
       const idPlayer = result.insertId
       const userData = [idPlayer, req.body.user_user_id]
-      console.log(userData)
       mysql.query(sql2, userData, (err, result2) => {
+        console.log(req.body.user_user_id)
         if (err) {
           res.status(500).send('2nd error')
         } else {
