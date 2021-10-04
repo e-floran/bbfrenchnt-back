@@ -1,6 +1,9 @@
 const express = require('express')
 const mysql = require('../db-config')
 
+const Joi = require('joi')
+const { object } = require('joi')
+
 const router = express.Router()
 
 //Get all players
@@ -51,62 +54,113 @@ router.get('/:id', (req, res) => {
 
 //Post into player
 router.post('/', (req, res) => {
-  const bodyData = [
-    req.body.player_name,
-    req.body.player_bbid,
-    req.body.player_pos,
-    req.body.player_salary,
-    req.body.player_dmi,
-    req.body.player_age,
-    req.body.player_size,
-    req.body.player_pot,
-    req.body.player_weekf,
-    req.body.player_js,
-    req.body.player_port,
-    req.body.player_exdef,
-    req.body.player_agi,
-    req.body.player_dri,
-    req.body.player_pas,
-    req.body.player_ishoot,
-    req.body.player_idef,
-    req.body.player_reb,
-    req.body.player_blk,
-    req.body.player_stam,
-    req.body.player_ft,
-    req.body.player_ex,
-    req.body.player_tc_ex,
-    req.body.player_tc_int,
-    req.body.player_tc,
-    req.body.player_ppot,
-    req.body.player_selec,
-    req.body.player_com,
-    req.body.player_link
-  ]
+  const {
+    name,
+    bbid,
+    pos,
+    salary,
+    dmi,
+    age,
+    size,
+    pot,
+    weekf,
+    js,
+    port,
+    exdef,
+    agi,
+    dri,
+    pas,
+    ishoot,
+    idef,
+    reb,
+    blk,
+    stam,
+    ft,
+    ex,
+    tc_ex,
+    tc_int,
+    tc,
+    ppot,
+    selec,
+    com,
+    link
+  } = req.body
+  //Required fields
+  const { error } = Joi.object({
+    name: Joi.string().max(255).required(),
+    bbid: Joi.number().required(),
+    pos: Joi.string().max(255).required(),
+    salary: Joi.number().required(),
+    dmi: Joi.number().required(),
+    age: Joi.number().less(100).required(),
+    size: Joi.string().max(255).required(),
+    pot: Joi.number().less(100).required(),
+    weekf: Joi.number().less(100).required()
+  }).validate(
+    { name, bbid, pos, salary, dmi, age, size, pot, weekf },
+    { abortEarly: false }
+  )
   //Insert into player
-  const sql = `INSERT INTO player
-  (player_name, player_bbid, player_pos, player_salary, player_dmi, player_age, player_size, player_pot, player_weekf, player_js, player_port, player_exdef, player_agi, player_dri, player_pas, player_ishoot, player_idef, player_reb, player_blk, player_stam, player_ft, player_ex, player_tc_ex, player_tc_int, player_tc, player_ppot, player_selec, player_com, player_link) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`
-  mysql.query(sql, bodyData, (err, result) => {
-    if (err) {
-      console.log(sql)
-      console.log(bodyData)
-      res.status(500).send('1st error')
-    } else {
-      //Insert into player_has_user
-      const sql2 = `INSERT INTO player_has_user
-    (player_player_id, user_user_id)
-    VALUES (?, ?)`
-      const idPlayer = result.insertId
-      const userData = [idPlayer, req.body.user_user_id]
-      mysql.query(sql2, userData, (err, result2) => {
-        console.log(req.body.user_user_id)
+  if (error) {
+    res.status(422).json({ validationErrors: error.details })
+  } else {
+    const sql = `INSERT INTO player
+    (player_name, player_bbid, player_pos, player_salary, player_dmi, player_age, player_size, player_pot, player_weekf, player_js, player_port, player_exdef, player_agi, player_dri, player_pas, player_ishoot, player_idef, player_reb, player_blk, player_stam, player_ft, player_ex, player_tc_ex, player_tc_int, player_tc, player_ppot, player_selec, player_com, player_link) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`
+    mysql.query(
+      sql,
+      [
+        name,
+        bbid,
+        pos,
+        salary,
+        dmi,
+        age,
+        size,
+        pot,
+        weekf,
+        js,
+        port,
+        exdef,
+        agi,
+        dri,
+        pas,
+        ishoot,
+        idef,
+        reb,
+        blk,
+        stam,
+        ft,
+        ex,
+        tc_ex,
+        tc_int,
+        tc,
+        ppot,
+        selec,
+        com,
+        link
+      ],
+      (err, result) => {
         if (err) {
-          res.status(500).send('2nd error')
+          res.status(500).send('1st error')
         } else {
-          res.status(200).json({ result, result2 })
+          //Insert into player_has_user
+          const sql2 = `INSERT INTO player_has_user
+            (player_player_id, user_user_id)
+            VALUES (?, ?)`
+          const idPlayer = result.insertId
+          const userData = [idPlayer, req.body.user_user_id]
+          mysql.query(sql2, userData, (err, result2) => {
+            console.log(req.body.user_user_id)
+            if (err) {
+              res.status(500).send('2nd error')
+            } else {
+              res.status(200).json({ result, result2 })
+            }
+          })
         }
-      })
-    }
-  })
+      }
+    )
+  }
 })
 
 //PUT player by id
