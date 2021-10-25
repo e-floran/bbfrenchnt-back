@@ -30,6 +30,10 @@ const hashingOptions = {
   parallelism: 1
 }
 
+const hashPassword = plainPassword => {
+  return argon2.hash(plainPassword, hashingOptions)
+}
+
 //Check password
 const verifyPassword = (plainPassword, hashedPassword) => {
   return argon2.verify(hashedPassword, plainPassword, hashingOptions)
