@@ -11,6 +11,6 @@ const hashPassword = plainPassword => {
   return argon2.hash(plainPassword, hashingOptions)
 }
 
-hashPassword('test').then(hashedPassword => {
+hashPassword('jambonFromage').then(hashedPassword => {
   console.log(hashedPassword)
 })

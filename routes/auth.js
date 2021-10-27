@@ -3,7 +3,10 @@ const connection = require('../db-config')
 const jwt = require('jsonwebtoken')
 const mysql = require('../db-config')
 const argon2 = require('argon2')
+const { response } = require('express')
 const db = connection.promise()
+
+const axios = require('axios')
 
 const router = express.Router()
 
@@ -60,7 +63,28 @@ router.post('/', (req, res) => {
       verifyPassword(password, user.user_passw).then(passwC => {
         if (passwC) {
           const token = calculateToken(log)
-          res.send(token)
+          // res.send(token)
+          const getApiData = async () => {
+            try {
+              console.log('hey')
+              const getApiData = await axios.get(
+                `https://bbapi.buzzerbeater.com/login.aspx?login=${log}&code=${password}`,
+                {
+                  // Accept: 'application/xml',
+                  'Content-Type': 'application/json'
+                }
+              )
+              console.log(getApiData)
+              res.status(200).send(token)
+              // res.status(200).send(getApiData)
+              // .then(response => {
+              //   console.log('API', response)
+              // })
+            } catch (error) {
+              console.error(error)
+            }
+          }
+          getApiData()
         } else res.send('Invalid Password')
       })
     }
