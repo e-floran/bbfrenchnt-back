@@ -25,6 +25,7 @@ app.use(express.urlencoded({ extended: true }))
 app.use('/players', routes.players)
 app.use('/users', routes.users)
 app.use('/auth', routes.auth)
+app.use('/apidata', routes.apidata)
 
 app.listen(port, () => {
   console.log(`Server listening on port ${port}`)

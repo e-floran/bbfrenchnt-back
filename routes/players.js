@@ -38,6 +38,7 @@ router.get('/:id', (req, res) => {
     if (err) {
       res.status(500).send('1st Error')
     } else {
+      console.log('salut')
       //SELECT on player_has_user
       const sql2 =
         'SELECT phu.player_player_id,user.* FROM player_has_user as phu LEFT JOIN user ON phu.user_user_id=user.user_id WHERE phu.player_player_id=?'

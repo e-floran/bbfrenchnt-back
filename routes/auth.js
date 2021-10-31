@@ -3,7 +3,7 @@ const connection = require('../db-config')
 const jwt = require('jsonwebtoken')
 const mysql = require('../db-config')
 const argon2 = require('argon2')
-const { response } = require('express')
+
 const db = connection.promise()
 
 const axios = require('axios')
@@ -33,9 +33,9 @@ const hashingOptions = {
   parallelism: 1
 }
 
-const hashPassword = plainPassword => {
-  return argon2.hash(plainPassword, hashingOptions)
-}
+// const hashPassword = plainPassword => {
+//   return argon2.hash(plainPassword, hashingOptions)
+// }
 
 //Check password
 const verifyPassword = (plainPassword, hashedPassword) => {
@@ -56,6 +56,7 @@ const getToken = req => {
 }
 
 router.post('/', (req, res) => {
+  let cookie = []
   const { log, password } = req.body
   findByLog(log).then(user => {
     if (!user) res.status(401).send('Invalid log')
@@ -63,23 +64,15 @@ router.post('/', (req, res) => {
       verifyPassword(password, user.user_passw).then(passwC => {
         if (passwC) {
           const token = calculateToken(log)
-          // res.send(token)
           const getApiData = async () => {
             try {
               console.log('hey')
               const getApiData = await axios.get(
-                `https://bbapi.buzzerbeater.com/login.aspx?login=${log}&code=${password}`,
-                {
-                  // Accept: 'application/xml',
-                  'Content-Type': 'application/json'
-                }
+                `https://bbapi.buzzerbeater.com/login.aspx?login=${log}&code=${password}`
               )
-              console.log(getApiData)
-              res.status(200).send(token)
-              // res.status(200).send(getApiData)
-              // .then(response => {
-              //   console.log('API', response)
-              // })
+              cookie = getApiData.headers['set-cookie']
+              console.log(cookie)
+              res.send({ token, cookie })
             } catch (error) {
               console.error(error)
             }
