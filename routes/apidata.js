@@ -6,17 +6,16 @@ const axios = require('axios')
 const router = express.Router()
 
 const cookie = [
-  '.ASPXAUTH=F271A207D0A382C0422BD3647ADD68DEFF074086BAE22C376911407829B73889A7E24C3E2448D0969CDD284FCED26C268A6C3653119C5E55372B7C5C5ADD9AFB2726BFC9FEB575FC6757A5B62F5507DF808ECA3A4F919639D17D90D66E917AB2A7BD241CD2CEDC8950921D4DBA0369D68888E5F5; ASP.NET_SessionId=ezk1ie5pnag0lhakadpefuec'
+  '.ASPXAUTH=284FB86180B234AFC33E815362F77087DC65600314D912DCD9F14B31DBF59954AB2466CDD285E28DE1125BED62271F1AC56D02F4EAC774D191D51FD46A98BB87807DFA22B4ABDB4730F1DCBA999638CA638B9AD471FCD7A34D2835C09ECEA64AE4E7E51AD3D49461CA0AACBE7B2960F13D24823A; ASP.NET_SessionId=32jwsiw03cb5ke2ypzspzv3x'
 ]
 
 router.get('/', (req, res) => {
-  console.log('hey')
   const proA = []
   const getApiData = async () => {
     try {
       const getApiData = await axios
         .get(
-          `https://bbapi.buzzerbeater.com/leagues.aspx?countryid=11&level=1`,
+          `https://bbapi.buzzerbeater.com/leagues.aspx?countryid=11&level=2`,
           {
             headers: {
               Cookie: cookie[0]
@@ -24,9 +23,15 @@ router.get('/', (req, res) => {
           }
         )
         .then(response => {
-          console.log('retrieving leagues 2 : ', response)
+          console.log('retrieving leagues : ', response)
           parseString(response.data, function (err, result) {
-            proA.push(result.bbapi.division[0].league[0])
+            // console.log(
+            //   'retrievingLeagues 2: ',
+            //   result.bbapi.division[0].league[0]
+            // )
+            for (let j = 0; j < result.bbapi.division[0].league.length; j++) {
+              proA.push(result.bbapi.division[0].league[j])
+            }
           })
         })
     } catch (error) {
@@ -34,46 +39,48 @@ router.get('/', (req, res) => {
     }
   }
   getApiData().then(() => {
-    console.log(proA)
+    console.log('all leagues', proA[0])
     const stockTeams = []
     const getTeam = async () => {
-      await axios
-        .get(
-          `https://bbapi.buzzerbeater.com/standings.aspx?leagueid=${proA[0].$.id}`,
-          {
-            headers: {
-              Cookie: cookie[0]
-            }
-          }
-        )
-        .then(response2 => {
-          parseString(response2.data, function (err, result) {
-            console.log(
-              'retrievingTeams : ',
-              result.bbapi.standings[0].regularSeason[0].conference
-            )
-            for (
-              let j = 0;
-              j < result.bbapi.standings[0].regularSeason[0].conference.length;
-              j++
-            ) {
-              for (
-                let i = 0;
-                i <
-                result.bbapi.standings[0].regularSeason[0].conference[j].team
-                  .length;
-                i++
-              ) {
-                stockTeams.push(
-                  result.bbapi.standings[0].regularSeason[0].conference[j].team[
-                    i
-                  ]
-                )
+      for (let j = 0; j < proA.length; j++) {
+        await axios
+          .get(
+            `https://bbapi.buzzerbeater.com/standings.aspx?leagueid=${proA[j].$.id}`,
+            {
+              headers: {
+                Cookie: cookie[0]
               }
-              console.log(stockTeams)
             }
+          )
+          .then(response2 => {
+            parseString(response2.data, function (err, result) {
+              console.log(
+                'retrievingTeams : ',
+                result.bbapi.standings[0].regularSeason[0].conference
+              )
+              for (
+                let j = 0;
+                j <
+                result.bbapi.standings[0].regularSeason[0].conference.length;
+                j++
+              ) {
+                for (
+                  let i = 0;
+                  i <
+                  result.bbapi.standings[0].regularSeason[0].conference[j].team
+                    .length;
+                  i++
+                ) {
+                  stockTeams.push(
+                    result.bbapi.standings[0].regularSeason[0].conference[j]
+                      .team[i]
+                  )
+                }
+                console.log(stockTeams)
+              }
+            })
           })
-        })
+      }
     }
     getTeam().then(() => {
       const stockPlayers = []
@@ -92,7 +99,7 @@ router.get('/', (req, res) => {
               stockPlayers.push(result.bbapi.roster[0].player[j])
             }
           })
-          console.log(stockPlayers)
+          console.log(stockPlayers[0].skills[0])
         })
     })
   })

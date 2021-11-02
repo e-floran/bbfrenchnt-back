@@ -26,6 +26,7 @@ app.use('/players', routes.players)
 app.use('/users', routes.users)
 app.use('/auth', routes.auth)
 app.use('/apidata', routes.apidata)
+app.use('/test', routes.test)
 
 app.listen(port, () => {
   console.log(`Server listening on port ${port}`)
