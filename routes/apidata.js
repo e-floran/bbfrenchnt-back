@@ -36,41 +36,65 @@ router.get('/', (req, res) => {
   getApiData().then(() => {
     console.log(proA)
     const stockTeams = []
-    const getTeam = axios
-      .get(
-        `https://bbapi.buzzerbeater.com/standings.aspx?leagueid=${proA[0].$.id}`,
-        {
-          headers: {
-            Cookie: cookie[0]
-          }
-        }
-      )
-      .then(response2 => {
-        parseString(response2.data, function (err, result) {
-          console.log(
-            'retrievingTeams : ',
-            result.bbapi.standings[0].regularSeason[0].conference
-          )
-          for (
-            let j = 0;
-            j < result.bbapi.standings[0].regularSeason[0].conference.length;
-            j++
-          ) {
-            for (
-              let i = 0;
-              i <
-              result.bbapi.standings[0].regularSeason[0].conference[j].team
-                .length;
-              i++
-            ) {
-              stockTeams.push(
-                result.bbapi.standings[0].regularSeason[0].conference[j].team[i]
-              )
+    const getTeam = async () => {
+      await axios
+        .get(
+          `https://bbapi.buzzerbeater.com/standings.aspx?leagueid=${proA[0].$.id}`,
+          {
+            headers: {
+              Cookie: cookie[0]
             }
-            console.log(stockTeams)
           }
+        )
+        .then(response2 => {
+          parseString(response2.data, function (err, result) {
+            console.log(
+              'retrievingTeams : ',
+              result.bbapi.standings[0].regularSeason[0].conference
+            )
+            for (
+              let j = 0;
+              j < result.bbapi.standings[0].regularSeason[0].conference.length;
+              j++
+            ) {
+              for (
+                let i = 0;
+                i <
+                result.bbapi.standings[0].regularSeason[0].conference[j].team
+                  .length;
+                i++
+              ) {
+                stockTeams.push(
+                  result.bbapi.standings[0].regularSeason[0].conference[j].team[
+                    i
+                  ]
+                )
+              }
+              console.log(stockTeams)
+            }
+          })
         })
-      })
+    }
+    getTeam().then(() => {
+      const stockPlayers = []
+      axios
+        .get(
+          `https://bbapi.buzzerbeater.com/roster.aspx?teamid=${stockTeams[0].$.id}`,
+          {
+            headers: {
+              Cookie: cookie[0]
+            }
+          }
+        )
+        .then(response3 => {
+          parseString(response3.data, function (err, result) {
+            for (let j = 0; j < result.bbapi.roster[0].player.length; j++) {
+              stockPlayers.push(result.bbapi.roster[0].player[j])
+            }
+          })
+          console.log(stockPlayers)
+        })
+    })
   })
 })
 
